@@ -105,7 +105,10 @@ class Sentence():
         """
         Returns the set of all cells in self.cells known to be mines.
         """
-        
+        if len(self.cells) == self.count:
+            return self.cells
+        else:
+            return set()
 
        
 
@@ -113,7 +116,10 @@ class Sentence():
         """
         Returns the set of all cells in self.cells known to be safe.
         """
-        
+        if self.count == 0:
+            return self.cells
+        else:
+            return set()
 
     def mark_mine(self, cell):
         """
