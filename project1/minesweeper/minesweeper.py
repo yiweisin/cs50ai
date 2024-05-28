@@ -29,6 +29,10 @@ class Minesweeper():
             if not self.board[i][j]:
                 self.mines.add((i, j))
                 self.board[i][j] = True
+        # m = (1,1), (6,0), (6,6), (2,6), (3,6), (3,4) ,(4,1), (7,1)
+        # for mm in m:
+        #     self.mines.add(mm)
+        #     self.board[mm[0]][mm[1]] = True
 
         # At first, player has found no mines
         self.mines_found = set()
@@ -198,20 +202,34 @@ class MinesweeperAI():
         for i in range(cell[0] - 1, cell[0] + 2):
             for j in range(cell[1] - 1, cell[1] + 2):
                 if 0 <= i < self.height and 0 <= j < self.width:
-                    if (i,j) in self.mines:
-                        count -= 1
-                    elif (i, j) != cell and (i, j) not in self.mines and (i, j) not in self.safes:
+                    if (i, j) != cell and (i, j) not in self.safes:
                         cells.add((i, j))
         self.knowledge.append(Sentence(cells, count))
-        for sentence in self.knowledge:
-            for mine in sentence.known_mines():
-                self.mines.add(mine)
-            for safe in sentence.known_safes():
-                self.safes.add(safe)
-        
+      
+        while True:
+            changes = False
+            for sentence in self.knowledge:
+                for safe in sentence.known_safes():
+                    self.safes.add(safe)
+            for sentence in self.knowledge:
+                for s in self.safes:
+                    if s in sentence.cells:
+                        sentence.mark_safe(s)
+                        changes = True
+            for sentence in self.knowledge:
+                for mine in sentence.known_mines():
+                    self.mines.add(mine)
+            for sentence in self.knowledge:
+                for m in self.mines:
+                    if m in sentence.cells:
+                        sentence.mark_mine(m)
+                        changes = True
+            if changes == False:
+                break
         
 
-        
+
+
 
 
     def make_safe_move(self):
@@ -223,6 +241,7 @@ class MinesweeperAI():
         This function may use the knowledge in self.mines, self.safes
         and self.moves_made, but should not modify any of those values.
         """
+            
         for safe in self.safes:
             if safe not in self.moves_made:
                 return safe
