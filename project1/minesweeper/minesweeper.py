@@ -224,6 +224,15 @@ class MinesweeperAI():
                     if m in sentence.cells:
                         sentence.mark_mine(m)
                         changes = True
+            for sentence1 in self.knowledge:
+                for sentence2 in self.knowledge:
+                    if sentence1 != sentence2 and sentence1.cells.issubset(sentence2.cells):
+                        cells = sentence2.cells - sentence1.cells
+                        count = sentence2.count - sentence1.count
+                        if Sentence(cells, count) not in self.knowledge:
+                            self.knowledge.append(Sentence(cells, count))
+                            changes = True
+
             if changes == False:
                 break
         
