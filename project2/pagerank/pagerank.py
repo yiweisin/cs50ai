@@ -57,8 +57,17 @@ def transition_model(corpus, page, damping_factor):
     linked to by `page`. With probability `1 - damping_factor`, choose
     a link at random chosen from all pages in the corpus.
     """
-    raise NotImplementedError
-
+    p = dict()
+    for c in corpus:
+        if corpus[c] == set():
+            for cc in corpus:
+                corpus[c].add(cc)
+        if c == page:
+            for cc in corpus:
+                p[cc] = float((1-damping_factor) / len(corpus))
+                if cc in corpus[c]:
+                    p[cc] += float(damping_factor/len(corpus[c]))
+    return p
 
 def sample_pagerank(corpus, damping_factor, n):
     """
@@ -69,7 +78,22 @@ def sample_pagerank(corpus, damping_factor, n):
     their estimated PageRank value (a value between 0 and 1). All
     PageRank values should sum to 1.
     """
-    raise NotImplementedError
+    p = dict()
+    for c in corpus:
+        p[c] = 0
+    if n >= 1:
+        page = random.choice(list(corpus.keys()))
+        p[page] = int(p[page]) + 1
+
+    for i in range(n-1):
+        c = transition_model(corpus, page, damping_factor)
+        page = random.choices(list(c.keys()), list(c.values()))[0]
+        p[page] = int(p[page]) + 1
+    for x in p:
+        p[x] = float(p[x])/n
+    return p
+
+
 
 
 def iterate_pagerank(corpus, damping_factor):
@@ -81,7 +105,37 @@ def iterate_pagerank(corpus, damping_factor):
     their estimated PageRank value (a value between 0 and 1). All
     PageRank values should sum to 1.
     """
-    raise NotImplementedError
+    p = dict()
+    numLinks = dict()
+    for c in corpus:
+        if corpus[c] == set():
+            for cc in corpus:
+                corpus[c].add(cc)
+    for c in corpus:
+        p[c] = 1/len(corpus)
+        numLinks[c] = len(corpus[c])
+
+
+    previous = list(p.values())
+    needchange = True
+    while needchange:
+        needchange = False
+        for i in p:
+            add = 0
+            for j in corpus:
+                for k in corpus[j]:
+                    if k == i:
+                        add += damping_factor*p[j]/numLinks[j]
+            p[i] = ((1-damping_factor)/len(corpus)) + add
+        for x in range(len(previous)):
+            diff = previous[x] - list(p.values())[x]
+            if diff < -0.001 or diff> 0.001:
+                needchange = True
+        previous = list(p.values())
+        if needchange == False:
+            break
+
+    return p
 
 
 if __name__ == "__main__":
