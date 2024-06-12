@@ -119,12 +119,13 @@ class CrosswordCreator():
         """
         ox,oy = self.crossword.overlaps[x,y]
         to_remain = []
+        ori = self.domains[x].copy()
         for varx in self.domains[x]:
             for vary in self.domains[y]:
                 if varx[ox] == vary[oy]:
                     to_remain.append(varx) 
         self.domains[x]= set(to_remain)
-        if self.domains[x] == set():
+        if self.domains[x] == ori:
             return False
         return True
 
@@ -148,30 +149,38 @@ class CrosswordCreator():
                 for z in self.crossword.neighbors(x):
                     if z != y:
                         queue.append((z, x))
-            else:
+
+        for d in self.domains:
+            if not self.domains[d]:
                 return False
         return True
-        
-
-#check50 ai50/projects/2024/x/crossword
-
-        
-
-
 
     def assignment_complete(self, assignment):
         """
         Return True if `assignment` is complete (i.e., assigns a value to each
         crossword variable); return False otherwise.
         """
-        raise NotImplementedError
+        for ass in self.domains:
+            if not ass in assignment:
+                return False
+        return True
 
     def consistent(self, assignment):
         """
         Return True if `assignment` is consistent (i.e., words fit in crossword
         puzzle without conflicting characters); return False otherwise.
         """
-        raise NotImplementedError
+        for ass in assignment:
+            for key in self.domains:
+                if ass == key:
+                    if len(assignment[ass]) == key.length:
+                         pass
+                        
+                    else:
+                        return False
+        return True
+
+#check50 ai50/projects/2024/x/crossword
 
     def order_domain_values(self, var, assignment):
         """
