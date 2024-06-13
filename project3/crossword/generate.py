@@ -174,13 +174,17 @@ class CrosswordCreator():
             for key in self.domains:
                 if ass == key:
                     if len(assignment[ass]) == key.length:
-                         pass
-                        
+                        for i in self.domains:
+                            if i == key:
+                                for j in self.crossword.neighbors(i):
+                                    if j not in assignment:
+                                        continue
+                                    oi, oj = self.crossword.overlaps[i,j]
+                                    if assignment[i][oi] != assignment[j][oj]:
+                                        return False
                     else:
                         return False
         return True
-
-#check50 ai50/projects/2024/x/crossword
 
     def order_domain_values(self, var, assignment):
         """
@@ -189,7 +193,20 @@ class CrosswordCreator():
         The first value in the list, for example, should be the one
         that rules out the fewest values among the neighbors of `var`.
         """
-        raise NotImplementedError
+        d = dict()
+        for v in self.domains[var]:
+            for n in self.crossword.neighbors(var):
+                ov, on = self.crossword.overlaps[var,n]
+                x = 0
+                for v2 in self.domains[n]:
+                    if v[ov] != v2[on]:
+                        if v2 in assignment:
+                            continue
+                        x += 1
+                d[v] = x
+        sorted_d = sorted(d.items(), key=lambda item: item[1])
+        l = [item[0] for item in sorted_d]
+        return l
 
     def select_unassigned_variable(self, assignment):
         """
@@ -199,7 +216,23 @@ class CrosswordCreator():
         degree. If there is a tie, any of the tied variables are acceptable
         return values.
         """
-        raise NotImplementedError
+        d = dict()
+        for v in self.domains:
+            if v not in assignment:
+                x= 0
+                for i in self.domains[v]:
+                    x += 1
+                d[v] = x
+        sorted_d = sorted(d.items(), key=lambda item: item[1])
+        min = sorted_d[0][1]
+        min_n = len(self.crossword.neighbors(sorted_d[0][0]))
+        min_v = sorted_d[0][0]
+        for i in sorted_d:
+            if i[1] == min:
+                if len(self.crossword.neighbors(i[0])) < min_n:
+                    min_n = len(self.crossword.neighbors(i[0]))
+                    min_v = i[0]
+        return min_v
 
     def backtrack(self, assignment):
         """
@@ -210,8 +243,16 @@ class CrosswordCreator():
 
         If no assignment is possible, return None.
         """
-        raise NotImplementedError
-
+        if self.assignment_complete(assignment):
+            return assignment
+        var = self.select_unassigned_variable(assignment)
+        for v in self.order_domain_values(var,assignment):
+            if self.consistent(assignment):
+                assignment[var] = v
+                result = self.backtrack(assignment)
+                if result is not None: return result
+            del assignment[var]
+        return None
 
 def main():
 
