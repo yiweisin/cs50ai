@@ -59,7 +59,61 @@ def load_data(filename):
     labels should be the corresponding list of labels, where each label
     is 1 if Revenue is true, and 0 otherwise.
     """
-    raise NotImplementedError
+    evidence = list()
+    labels = list()
+    with open("shopping.csv", "r") as f:
+        d = f.readline()
+        data = f.readlines()
+    
+    
+    for r in data:
+        row = r.strip().split(",")
+        if row[10] == "Jan":
+            m = 0
+        elif row[10] == "Feb":
+            m = 1
+        elif row[10] == "Mar":
+            m = 2
+        elif row[10] == "Apr":
+            m = 3
+        elif row[10] == "May":
+            m = 4
+        elif row[10] == "Jun":
+            m = 5
+        elif row[10] == "Jul":
+            m = 6
+        elif row[10] == "Aug":
+            m = 7
+        elif row[10] == "Sep":
+            m = 8
+        elif row[10] == "Oct":
+            m = 9
+        elif row[10] == "Nov":
+            m = 10
+        elif row[10] == "Dec":
+            m = 11
+    
+
+        if row[15] == "New_Visitor":
+            v = 0
+        elif row[15] == "Returning_Visitor":
+            v = 1
+        
+        if row[16] == "FALSE":
+            w = 0
+        elif row[16] == "TRUE":
+            w = 1
+
+        evidence.append([int(row[0]),float(row[1]),int(row[2]),float(row[3]),int(row[4]),float(row[5]),float(row[6]),float(row[7]),float(row[8]),float(row[9]),m,int(row[11]),int(row[12]),int(row[13]),int(row[14]),v,w])
+
+        if row[17] == "TRUE":
+            labels.append(1)
+        else:
+            labels.append(0)
+
+    return (evidence, labels)
+        
+
 
 
 def train_model(evidence, labels):
